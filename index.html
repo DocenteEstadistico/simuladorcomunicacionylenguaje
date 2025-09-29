@@ -1,96 +1,281 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <title>MaIAnEspañol - Simulador de Español</title>
   <style>
     body { font-family: Arial, sans-serif; max-width: 900px; margin: auto; padding: 20px; background-color: #f5f5f5; }
-    header { text-align: center; margin-bottom: 30px; }
+    header { text-align: center; margin-bottom: 20px; }
     header img { max-width: 150px; margin-bottom: 10px; }
     header h1 { margin: 0; font-size: 2em; color: #333; }
     header p { font-size: 1em; color: #555; }
-    .question { margin-bottom: 20px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+    .passage { background: #fffef6; padding: 12px 15px; border-radius: 6px; margin-bottom: 10px; border-left: 4px solid #f0ad4e; color:#333; }
+    .question { margin-bottom: 18px; background: white; padding: 12px; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.06); }
     .result { font-weight: bold; font-size: 1.2em; margin-top: 20px; text-align: center; }
     button { padding: 10px 15px; margin-top: 10px; font-weight: bold; cursor: pointer; border-radius: 5px; border: none; background-color: #007bff; color: white; }
     button:hover { background-color: #0056b3; }
     .hidden { display: none; }
     .correct { background-color: #d4edda; border-left: 5px solid #28a745; }
     .incorrect { background-color: #f8d7da; border-left: 5px solid #dc3545; }
-    #timer { font-weight: bold; font-size: 1.2em; color: red; text-align: center; margin: 15px; }
+    #timer { font-weight: bold; font-size: 1.1em; color: #b30000; text-align: center; margin: 12px 0; }
+    .passage-title { font-weight: bold; margin-bottom: 6px; display:block; }
   </style>
 </head>
 <body>
   <header>
-    <img src="MaIA.webp" alt="Logo MaIAnEspañol">
+    <img src="MaIA.webp" alt="Logo MaIAnEspañol" onerror="this.style.display='none'">
     <h1>MaIAnEspañol</h1>
     <p>Simulador Diagnóstico de Español - Undécimo Grado<br>Dispones de 20 minutos para resolver el test.</p>
   </header>
 
-  <button onclick="loadTest()">Iniciar Test</button>
+  <div style="text-align:center; margin-bottom:10px;">
+    <button id="startBtn" onclick="loadTest()">Iniciar Simulador de Idioma Español</button>
+  </div>
+
   <div id="timer"></div>
 
   <form id="testForm" class="hidden" onsubmit="return gradeTest(event)">
     <div id="questions"></div>
-    <button type="submit">Enviar Respuestas</button>
+    <div style="text-align:center;">
+      <button type="submit">Enviar Respuestas</button>
+    </div>
   </form>
+
   <div class="result" id="result"></div>
 
   <script>
     const tests = {
       espanol: [
-        { q: "¿De qué trata el texto sobre las aguas termales?", options: ["De la utilización de las aguas termales.", "De la atracción turística de las aguas termales.", "De los lugares donde existen aguas termales.", "Del daño que causan las aguas termales."], answer: 0 },
+        // Texto 1: Manantiales poco estudiados (preguntas 1-4)
+        {
+          passage: `¡MANANTIALES POCO ESTUDIADOS!
+Las aguas termales son aguas minerales que salen del suelo con altas temperaturas, proceden de las capas subterráneas de la tierra que se encuentran a mayor temperatura, las cuales son ricas en diferentes componentes minerales y permiten su utilización en la terapéutica como baños, inhalaciones, irrigaciones y calefacciones que vienen a sanar enfermedades. Se conoce que las aguas subterráneas que circulan por la corteza terrestre constituyen agentes fundamentales en los procesos geológicos de formación, además son un solvente natural completo y dinámico, el agua participa tanto en los procesos de disolución y transporte como en las reacciones químicas y en la transferencia de calor, gases y elementos químicos. Estos elementos químicos son transportados desde el interior de la tierra con componentes químicos radioactivos naturales a través de la biosfera hasta alcanzar al hombre. En Honduras aún no se tiene muy claro la composición mineral ni de los gases disueltos que emanan con el fin de conocer los niveles de oxígeno, anhídrido carbónico, o si en esta agua existen materiales radioactivos disueltos que pueden producir daños a la salud humana, como consecuencia directa de su consumo, dosis de irradiación interna tanto por ingestión como por inhalación de estos elementos, pues se tiene conocimiento que no existe en el país instrumentos para conocer su contextura mineral.`,
+          q: "¿De qué trata el texto sobre las aguas termales?",
+          options: [
+            "De la utilización de las aguas termales.",
+            "De la atracción turística de las aguas termales.",
+            "De los lugares donde existen aguas termales.",
+            "Del daño que causan las aguas termales."
+          ],
+          answer: 0
+        },
         { q: "Según el texto, ¿de dónde surgen las aguas termales?", options: ["De las alteraciones en las zonas climáticas.", "De las capas subterráneas de la tierra.", "De erosiones ocasionadas por las lluvias.", "De los frecuentes terremotos en el planeta."], answer: 1 },
         { q: "¿Qué significa la palabra 'emanan' en el texto?", options: ["Brillan", "Absorben", "Desprenden", "Integran"], answer: 2 },
         { q: "¿Qué significa la palabra 'terapéutica' en el texto?", options: ["Inyecciones", "Tratamiento", "Diagnósticos", "Frascos"], answer: 1 },
-        { q: "Según el relato, ¿qué sucedía dentro de la ciudad?", options: ["Pintaban con murales las paredes.", "Construían muros de mármol.", "Saqueaban su enorme riqueza.", "Había un ambiente de fiesta."], answer: 3 },
-        { q: "Según la carta de Andrea, ¿a qué le teme?", options: ["A la exigencia que muestra el profesor.", "A la extensa prueba de lengua española.", "A los exámenes de la siguiente semana.", "A lo que pueda pensar su amigo."], answer: 0 },
-        { q: "¿Qué significa la palabra 'surcada' en el texto de Palencia?", options: ["Inundada", "Sembrada", "Atravesada", "Cercada"], answer: 2 },
-        { q: "¿Qué significa la palabra 'trepidante' en el texto del tren?", options: ["Acalorado", "Barroso", "Desértico", "Tembloroso"], answer: 3 },
-        { q: "¿Para qué nombran miembro activo a la Srta. Morales?", options: ["Para que apoye a los habitantes de la comunidad.", "Para que realice actividades económicas.", "Para que fiscalice el patrimonio del pueblo.", "Para que dirija todas las sesiones del patronato."], answer: 1 },
-        { q: "Según el texto, ¿qué hacía Lily en el jardín?", options: ["Hablaba con todas las plantas.", "Jugaba con los peces de bellos colores.", "Leía muchos libros en el puentecito.", "Limpiaba el estanque por la mañana."], answer: 0 },
-        { q: "¿Qué significa la frase 'despertar furtivo' en el texto?", options: ["Con facilidad.", "Sin recuerdo.", "En secreto.", "Contra el deseo."], answer: 2 },
-        { q: "¿De qué trata el texto de recomendaciones para el jardín?", options: ["De la preparación de abonos orgánicos.", "De controlar los insectos en las plantas.", "Del aprovechamiento de aguas lluvias.", "De consejos para cuidar los jardines."], answer: 3 },
-        { q: "¿De qué trata el texto '¡Su sangre puede salvarlo!'?", options: ["De la importancia de donar sangre.", "De las necesidades de las familias.", "De resolver los problemas a diario.", "De arrepentirse de los fracasos."], answer: 0 },
-        { q: "Según el texto, ¿qué distingue a Body?", options: ["Sus ladridos.", "Su bravura.", "Su caminar.", "Su tamaño."], answer: 0 },
-        { q: "Según el texto, ¿por qué el zorro requirió de su astucia?", options: ["Para jugar con los pequeños cachorros.", "Para apoyar a su amigo el gato montés.", "Para salvarse del ataque de los perros.", "Para hacerse amigo de los animales."], answer: 0 },
+
+        // Texto 2: Relato de la ciudad amurallada (pregunta 5)
+        {
+          passage: `Era de noche, caminaba despacio, vio desde lejos las bellas murallas de una vasta ciudad y se acercó a ella. Cuando estuvo muy cerca oyó la risa de la alegría y el sonido penetrante de numerosos laúdes. Llamó, y uno de los guardianes de las puertas le abrió. Y contempló una casa construida con mármol que tenía unas bellas columnatas cubiertas de guirnaldas, dentro y fuera había antorchas de cedro. Sólo tuvo un deseo: quedarse.`,
+          q: "Según el relato, ¿qué sucedía dentro de la ciudad?",
+          options: [
+            "Pintaban con murales las paredes.",
+            "Construían muros de mármol.",
+            "Saqueaban su enorme riqueza.",
+            "Había un ambiente de fiesta."
+          ],
+          answer: 3
+        },
+
+        // Texto 3: Carta de Andrea (pregunta 6)
+        {
+          passage: `Estimado amigo:
+Hoy ha sido un día difícil porque hemos tenido dos exámenes: lengua española e inglés. El primero me ha salido bastante bien, aunque no sé la nota final porque mi profesor es muy exigente, y ahora que él poco lee, no sé qué va a pasar. El de inglés ha sido más difícil. Creo que estudié poco el vocabulario, que nos dijo que iba a entrar. ¡Me cuesta tanto aprender esas palabras tan raras!
+Andrea`,
+          q: "Según la carta de Andrea, ¿a qué le teme?",
+          options: [
+            "A la exigencia que muestra el profesor.",
+            "A la extensa prueba de lengua española.",
+            "A los exámenes de la siguiente semana.",
+            "A lo que pueda pensar su amigo."
+          ],
+          answer: 0
+        },
+
+        // Texto 4: Palencia (pregunta 7)
+        {
+          passage: `Palencia era clara y abierta. Por cualquier parte tenía la entrada franca y alegre y se partía como una hogaza de pan. La calle mayor tenía soportales de piedra blanca y le daba el sol. Al otro lado del río estaba la vega poblada de viñas, hortalizas y árboles de frutas; surcada de largos canales.`,
+          q: "¿Qué significa la palabra 'surcada' en el texto de Palencia?",
+          options: ["Inundada", "Sembrada", "Atravesada", "Cercada"],
+          answer: 2
+        },
+
+        // Texto 5: Tren y plantaciones (pregunta 8)
+        {
+          passage: `El tren salió del trepidante corredor de rocas bermejas, penetró en las plantaciones de banano, simétricas e interminables. En el estrecho camino paralelo a la vía férrea había carretas de bueyes cargadas de racimos verdes. Al otro lado del camino residencias con sillas y mesitas blancas, que provocaban que Lucila deseara bajarse allí.`,
+          q: "¿Qué significa la palabra 'trepidante' en el texto del tren?",
+          options: ["Acalorado", "Barroso", "Desértico", "Tembloroso"],
+          answer: 3
+        },
+
+        // Texto 6: Circular del Patronato (pregunta 9)
+        {
+          passage: `CIRCULAR NÚMERO 8934
+Comayagüela, 3 de enero de 2010
+
+Srta. Mirza Morales
+
+Este Patronato, en sesión ordinaria, la ha designado como Miembro Activo de Eventos Culturales, cuya misión será organizar actividades para la adquisición de fondos que aumenten nuestro patrimonio económico con el que solventaremos el financiamiento para la instalación del agua potable en nuestra comunidad.
+
+Atentamente,
+Julio Rodríguez Montes
+Presidente del Patronato`,
+          q: "¿Para qué nombran miembro activo a la Srta. Morales?",
+          options: [
+            "Para que apoye a los habitantes de la comunidad.",
+            "Para que realice actividades económicas.",
+            "Para que fiscalice el patrimonio del pueblo.",
+            "Para que dirija todas las sesiones del patronato."
+          ],
+          answer: 1
+        },
+
+        // Texto 7: Jardín de Lily (preguntas 10 y 12)
+        {
+          passage: `Un jardín repleto de hermosas y variadas flores era la estancia principal de la casa donde vivía Lily, con un pequeño estanque en el centro y un puentecito que lo cruzaba por encima permitiendo disfrutar del exquisito paisaje que ofrecían los peces de colores de diversos tamaños. El aroma de las flores silvestres creaba un entorno extremadamente apacible, sosegador; donde Lily susurraba dulces palabras a cada uno de los vegetales que allí existían.`,
+          q: "Según el texto, ¿qué hacía Lily en el jardín?",
+          options: [
+            "Hablaba con todas las plantas.",
+            "Jugaba con los peces de bellos colores.",
+            "Leía muchos libros en el puentecito.",
+            "Limpiaba el estanque por la mañana."
+          ],
+          answer: 0
+        },
+        {
+          q: "¿De qué trata el texto (consejos del jardín)?",
+          options: [
+            "De la preparación de abonos orgánicos.",
+            "De controlar los insectos en las plantas.",
+            "Del aprovechamiento de aguas lluvias.",
+            "De consejos para cuidar los jardines."
+          ],
+          answer: 3
+        },
+
+        // Texto 8: Despertar furtivo (pregunta 11)
+        {
+          passage: `Estaba en mi cuarto, una cama, una mesa y un radio eran los únicos acompañantes de mi despertar furtivo, tan solo una ventana le daba nombre a mi conciencia. Estaba en casa, cómodo y completo. Aún cuando no podía ver lo que sucedía más allá de mi ventana. Pero quién dice que quiero saberlo, si lo único que me conforta es el descanso para volver mañana a mi trabajo.`,
+          q: "¿Qué significa la frase 'despertar furtivo' en el texto?",
+          options: ["Con facilidad.", "Sin recuerdo.", "En secreto.", "Contra el deseo."],
+          answer: 2
+        },
+
+        // Texto 9: Riego de jardines (pregunta 12) -> note: used earlier as "consejos" but included already.
+        {
+          passage: `Riegue su jardín durante las primeras o últimas horas del día, evite así la pérdida de agua por evaporación; no riegue su jardín en exceso, es suficiente cada tres días en verano y cada quince en invierno. Recuerde que la diferencia no está en regarlos a cada instante sino en el tiempo y hora indicada. También use buenos abonos, éstos ayudarán a conservar la humedad.`,
+          q: "¿De qué trata el texto de recomendaciones para el jardín?",
+          options: [
+            "De la preparación de abonos orgánicos.",
+            "De controlar los insectos en las plantas.",
+            "Del aprovechamiento de aguas lluvias.",
+            "De consejos para cuidar los jardines."
+          ],
+          answer: 3
+        },
+
+        // Texto 10: Donar sangre (pregunta 13)
+        {
+          passage: `¡Su sangre puede salvarlo! ¿Sabe usted lo que significa salvar su vida u otra vida? No lo decida en el momento límite; es menester que la idea se haya considerado y discutido previamente, con calma y en profundidad con quienes comparte. Nadie está exento de que la vida a salvar pueda ser la propia o la de un ser querido. Por eso debería destacarse que todo a tiempo evita arrepentirse por no haberlo hecho.`,
+          q: "¿De qué trata el texto '¡Su sangre puede salvarlo!'?",
+          options: [
+            "De la importancia de donar sangre.",
+            "De las necesidades de las familias.",
+            "De resolver los problemas a diario.",
+            "De arrepentirse de los fracasos."
+          ],
+          answer: 0
+        },
+
+        // Texto 11: Body (pregunta 14)
+        {
+          passage: `Body es fiel como ninguno y considerado el más feroz de la especie. Es un canino de color negro azabache. Su pelaje es abundante. Posee extremidades largas y robustas. Sus orejas inconfundibles y su hocico afilado. Su frente se adorna con una mancha blanca. En su collar hay una placa en la que se podrá leer su bello nombre.`,
+          q: "Según el texto, ¿qué distingue a Body?",
+          options: ["Sus ladridos.", "Su bravura.", "Su caminar.", "Su tamaño."],
+          answer: 1
+        },
+
+        // Texto 12: El zorro y los perros (preguntas 15-18)
+        {
+          passage: `El ingenio del zorro parece agudizarse cuando el hambre lo apura, entonces idea coartadas para atraer a sus posibles bocados, lo que muchas veces logra. Mientras haya algo para comer, regresa cuantas veces le sea posible. Una noche, cuando todos se habían ido a dormir, el zorro se levantó cautelosamente, se acercó a una perra que tenía cachorros y se llevó dos lejos del lugar. Por la mañana se comentaba la falta de los cachorros -¿Dónde se habrán ido mis cachorros? Se preguntaba la perra. Buscaron todo el día, pero, lógicamente, nadie los halló. ¡Ni rastros de ellos! Durante varios días, el zorro cautelosamente, iba devorando sin dejar la menor señal. Cierto día, los perros comenzaron a desconfiar del zorro, ya que estaba engordando y no salía a cazar como lo hacían ellos. El zorro se dio cuenta de la desconfianza de los perros, ya que lo miraban de soslayo. Esto motivó su alejamiento, para ir a esconderse muy lejos. El hecho de irse sin decir nada, aseguró la sospecha de los perros, que comenzaron a buscarlo afanosamente. Había pasado un largo tiempo. El zorro creyó que ya habían olvidado su indigno proceder y regresó como si no hubiese ocurrido nada. El gato montés, su amigo, le dijo: -vete, los perros te están cercando para agarrarte. -Si ellos están muy enojados, yo demostraré que estoy muy contento dijo el zorro, me pondré a cantar. -Canta si quieres, pero recuerda que te previne. Sentado en una laja, el zorro entonó su canción favorita varias veces; hasta que un rápido tropel de perros de todos tamaños, le cayó encima. Le llovían dientes por todos lados y sentía que su piel se desgarraba. Lo tironeaban sin piedad. El zorro recurrió a un ardid propio de su estirpe. Se hizo el muerto y le dio resultado. Los perros así lo creyeron y lo dejaron al fin. Cuando los agresores se perdieron a la distancia, el zorro, muy maltrecho, se levantó y se dirigió a su escondite, donde permaneció varios días asistido por su amigo, el gato montés. Después de esta dura experiencia, nunca más se acercó a los perros ni a los otros animales. Vive solitario y trata de no ser visto.`,
+          q: "Según el texto, ¿por qué el zorro requirió de su astucia?",
+          options: [
+            "Para jugar con los pequeños cachorros.",
+            "Para apoyar a su amigo el gato montés.",
+            "Para salvarse del ataque de los perros.",
+            "Para hacerse amigo de los animales."
+          ],
+          answer: 2
+        },
         { q: "Según el texto, ¿por qué el zorro se convirtió en sospechoso?", options: ["Porque caminaba solo en el bosque.", "Porque vivía acompañado de animales.", "Porque usaba artimañas para cazar.", "Porque aumentaba de peso cada día."], answer: 3 },
         { q: "¿Qué significa la palabra 'maltrecho' en el texto?", options: ["Golpeado", "Vanidoso", "Engreído", "Enfermizo"], answer: 0 },
         { q: "¿Qué significa la frase 'Le llovían dientes' en el texto?", options: ["Le ensordecían los latidos.", "Le sonreían al mismo tiempo.", "Era ferozmente atacado.", "Era un juego entre animales."], answer: 2 },
-        { q: "Completa: 'Todos los años, por el mes de marzo, una familia de gitanos ________ cerca de la aldea...'", options: ["plantaban sus carpas", "plantaba su carpa", "plantaron sus carpas", "plantaran su carpa"], answer: 0 },
-        { q: "Completa: 'Recuerdo a Julián... desde pequeño le encantaban los chistes y se reía _______ los hubieras terminado de contar.'", options: ["cuando", "en cuanto", "nada más que", "antes de que"], answer: 1 }
+
+        // Texto 13: Oración sobre gitanos (pregunta 19)
+        {
+          passage: `Todos los años, por el mes de marzo, una familia de gitanos ______ cerca de la aldea y con un gran alboroto daba a conocer los nuevos inventos.`,
+          q: `Completa: "Todos los años, por el mes de marzo, una familia de gitanos ______ cerca de la aldea..."`,
+          options: ["plantaban sus carpas", "plantaba su carpa", "plantaron sus carpas", "plantaran su carpa"],
+          answer: 0
+        },
+
+        // Texto 14: Julián (pregunta 20)
+        {
+          passage: `Recuerdo a Julián, el más inquieto de la casa, desde pequeño le encantaban los chistes y se reía ___ los hubieras terminado de contar.`,
+          q: `Completa: "Recuerdo a Julián... se reía ______ los hubieras terminado de contar."`,
+          options: ["cuando", "en cuanto", "nada más que", "antes de que"],
+          answer: 1
+        }
       ]
     };
 
     let timeLeft = 1200; // 20 minutos en segundos
-    let timer;
+    let timer = null;
 
     function startTimer() {
       const timerDisplay = document.getElementById('timer');
+      // evitar múltiples timers
+      if (timer) clearInterval(timer);
       timer = setInterval(() => {
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          timer = null;
+          gradeTestAuto();
+          return;
+        }
         let minutes = Math.floor(timeLeft / 60);
         let seconds = timeLeft % 60;
         timerDisplay.innerText = `⏰ Tiempo restante: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-        if (timeLeft <= 0) {
-          clearInterval(timer);
-          gradeTestAuto();
-        }
         timeLeft--;
       }, 1000);
     }
 
     function loadTest() {
+      // deshabilitar botón de inicio para evitar recargas múltiples
+      const startBtn = document.getElementById('startBtn');
+      startBtn.disabled = true;
+      startBtn.innerText = "Test iniciado";
+
       const questions = tests.espanol;
       const container = document.getElementById('questions');
       const form = document.getElementById('testForm');
       container.innerHTML = '';
 
       questions.forEach((q, i) => {
+        // si el objeto tiene "passage", muéstralo antes de la pregunta
+        if (q.passage) {
+          const pdiv = document.createElement('div');
+          pdiv.className = 'passage';
+          pdiv.innerHTML = `<span class="passage-title">Texto ${Object.keys(tests.espanol).length ? '' : ''}</span><div>${q.passage.replace(/\n/g,'<br>')}</div>`;
+          container.appendChild(pdiv);
+        }
+
         const div = document.createElement('div');
         div.classList.add('question');
         div.setAttribute('id', `question-${i}`);
         let optionsHTML = '';
         q.options.forEach((opt, j) => {
-          optionsHTML += `<label style="display: block; margin: 5px 0;"><input type="radio" name="q${i}" value="${j}" required> ${opt}</label>`;
+          // removemos required en cada input para no bloquear el forzado por timer; validación seguirá en envío manual
+          optionsHTML += `<label style="display: block; margin: 6px 0;"><input type="radio" name="q${i}" value="${j}"> ${opt}</label>`;
         });
         div.innerHTML = `<p><b>${i + 1}. ${q.q}</b></p>${optionsHTML}`;
         container.appendChild(div);
@@ -99,6 +284,8 @@
       form.classList.remove('hidden');
       document.getElementById('result').innerText = '';
       startTimer();
+      // desplazar hacia el test
+      window.scrollTo({ top: document.getElementById('questions').offsetTop - 20, behavior: 'smooth' });
     }
 
     function gradeTest(event) {
@@ -108,12 +295,13 @@
     }
 
     function gradeTestAuto() {
-      clearInterval(timer);
+      if (timer) { clearInterval(timer); timer = null; }
       const questions = tests.espanol;
       let score = 0;
 
       questions.forEach((q, i) => {
         const questionDiv = document.getElementById(`question-${i}`);
+        if (!questionDiv) return;
         questionDiv.classList.remove('correct', 'incorrect');
         const selected = document.querySelector(`input[name="q${i}"]:checked`);
         if (selected) {
@@ -125,7 +313,8 @@
             questionDiv.classList.add('incorrect');
           }
         } else {
-          questionDiv.classList.add('incorrect'); // no contestada cuenta como incorrecta
+          // no contestada -> incorrecta
+          questionDiv.classList.add('incorrect');
         }
       });
 
@@ -144,7 +333,7 @@
       }
 
       result.innerText = message;
-      window.scrollTo(0, document.body.scrollHeight);
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
   </script>
 </body>
