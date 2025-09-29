@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>MaIAnEspañol - Simulador de Español</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: auto; padding: 20px; background-color: #f5f5f5; }
+    header { text-align: center; margin-bottom: 30px; }
+    header img { max-width: 150px; margin-bottom: 10px; }
+    header h1 { margin: 0; font-size: 2em; color: #333; }
+    header p { font-size: 1em; color: #555; }
+    .question { margin-bottom: 20px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+    .result { font-weight: bold; font-size: 1.2em; margin-top: 20px; text-align: center; }
+    button { padding: 10px 15px; margin-top: 10px; font-weight: bold; cursor: pointer; border-radius: 5px; border: none; background-color: #007bff; color: white; }
+    button:hover { background-color: #0056b3; }
+    .hidden { display: none; }
+    .correct { background-color: #d4edda; border-left: 5px solid #28a745; }
+    .incorrect { background-color: #f8d7da; border-left: 5px solid #dc3545; }
+    #timer { font-weight: bold; font-size: 1.2em; color: red; text-align: center; margin: 15px; }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="MaIA.webp" alt="Logo MaIAnEspañol">
+    <h1>MaIAnEspañol</h1>
+    <p>Simulador Diagnóstico de Español - Undécimo Grado<br>Dispones de 20 minutos para resolver el test.</p>
+  </header>
+
+  <button onclick="loadTest()">Iniciar Test</button>
+  <div id="timer"></div>
+
+  <form id="testForm" class="hidden" onsubmit="return gradeTest(event)">
+    <div id="questions"></div>
+    <button type="submit">Enviar Respuestas</button>
+  </form>
+  <div class="result" id="result"></div>
+
+  <script>
+    const tests = {
+      espanol: [
+        { q: "¿De qué trata el texto sobre las aguas termales?", options: ["De la utilización de las aguas termales.", "De la atracción turística de las aguas termales.", "De los lugares donde existen aguas termales.", "Del daño que causan las aguas termales."], answer: 0 },
+        { q: "Según el texto, ¿de dónde surgen las aguas termales?", options: ["De las alteraciones en las zonas climáticas.", "De las capas subterráneas de la tierra.", "De erosiones ocasionadas por las lluvias.", "De los frecuentes terremotos en el planeta."], answer: 1 },
+        { q: "¿Qué significa la palabra 'emanan' en el texto?", options: ["Brillan", "Absorben", "Desprenden", "Integran"], answer: 2 },
+        { q: "¿Qué significa la palabra 'terapéutica' en el texto?", options: ["Inyecciones", "Tratamiento", "Diagnósticos", "Frascos"], answer: 1 },
+        { q: "Según el relato, ¿qué sucedía dentro de la ciudad?", options: ["Pintaban con murales las paredes.", "Construían muros de mármol.", "Saqueaban su enorme riqueza.", "Había un ambiente de fiesta."], answer: 3 },
+        { q: "Según la carta de Andrea, ¿a qué le teme?", options: ["A la exigencia que muestra el profesor.", "A la extensa prueba de lengua española.", "A los exámenes de la siguiente semana.", "A lo que pueda pensar su amigo."], answer: 0 },
+        { q: "¿Qué significa la palabra 'surcada' en el texto de Palencia?", options: ["Inundada", "Sembrada", "Atravesada", "Cercada"], answer: 2 },
+        { q: "¿Qué significa la palabra 'trepidante' en el texto del tren?", options: ["Acalorado", "Barroso", "Desértico", "Tembloroso"], answer: 3 },
+        { q: "¿Para qué nombran miembro activo a la Srta. Morales?", options: ["Para que apoye a los habitantes de la comunidad.", "Para que realice actividades económicas.", "Para que fiscalice el patrimonio del pueblo.", "Para que dirija todas las sesiones del patronato."], answer: 1 },
+        { q: "Según el texto, ¿qué hacía Lily en el jardín?", options: ["Hablaba con todas las plantas.", "Jugaba con los peces de bellos colores.", "Leía muchos libros en el puentecito.", "Limpiaba el estanque por la mañana."], answer: 0 },
+        { q: "¿Qué significa la frase 'despertar furtivo' en el texto?", options: ["Con facilidad.", "Sin recuerdo.", "En secreto.", "Contra el deseo."], answer: 2 },
+        { q: "¿De qué trata el texto de recomendaciones para el jardín?", options: ["De la preparación de abonos orgánicos.", "De controlar los insectos en las plantas.", "Del aprovechamiento de aguas lluvias.", "De consejos para cuidar los jardines."], answer: 3 },
+        { q: "¿De qué trata el texto '¡Su sangre puede salvarlo!'?", options: ["De la importancia de donar sangre.", "De las necesidades de las familias.", "De resolver los problemas a diario.", "De arrepentirse de los fracasos."], answer: 0 },
+        { q: "Según el texto, ¿qué distingue a Body?", options: ["Sus ladridos.", "Su bravura.", "Su caminar.", "Su tamaño."], answer: 0 },
+        { q: "Según el texto, ¿por qué el zorro requirió de su astucia?", options: ["Para jugar con los pequeños cachorros.", "Para apoyar a su amigo el gato montés.", "Para salvarse del ataque de los perros.", "Para hacerse amigo de los animales."], answer: 0 },
+        { q: "Según el texto, ¿por qué el zorro se convirtió en sospechoso?", options: ["Porque caminaba solo en el bosque.", "Porque vivía acompañado de animales.", "Porque usaba artimañas para cazar.", "Porque aumentaba de peso cada día."], answer: 3 },
+        { q: "¿Qué significa la palabra 'maltrecho' en el texto?", options: ["Golpeado", "Vanidoso", "Engreído", "Enfermizo"], answer: 0 },
+        { q: "¿Qué significa la frase 'Le llovían dientes' en el texto?", options: ["Le ensordecían los latidos.", "Le sonreían al mismo tiempo.", "Era ferozmente atacado.", "Era un juego entre animales."], answer: 2 },
+        { q: "Completa: 'Todos los años, por el mes de marzo, una familia de gitanos ________ cerca de la aldea...'", options: ["plantaban sus carpas", "plantaba su carpa", "plantaron sus carpas", "plantaran su carpa"], answer: 0 },
+        { q: "Completa: 'Recuerdo a Julián... desde pequeño le encantaban los chistes y se reía _______ los hubieras terminado de contar.'", options: ["cuando", "en cuanto", "nada más que", "antes de que"], answer: 1 }
+      ]
+    };
+
+    let timeLeft = 1200; // 20 minutos en segundos
+    let timer;
+
+    function startTimer() {
+      const timerDisplay = document.getElementById('timer');
+      timer = setInterval(() => {
+        let minutes = Math.floor(timeLeft / 60);
+        let seconds = timeLeft % 60;
+        timerDisplay.innerText = `⏰ Tiempo restante: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          gradeTestAuto();
+        }
+        timeLeft--;
+      }, 1000);
+    }
+
+    function loadTest() {
+      const questions = tests.espanol;
+      const container = document.getElementById('questions');
+      const form = document.getElementById('testForm');
+      container.innerHTML = '';
+
+      questions.forEach((q, i) => {
+        const div = document.createElement('div');
+        div.classList.add('question');
+        div.setAttribute('id', `question-${i}`);
+        let optionsHTML = '';
+        q.options.forEach((opt, j) => {
+          optionsHTML += `<label style="display: block; margin: 5px 0;"><input type="radio" name="q${i}" value="${j}" required> ${opt}</label>`;
+        });
+        div.innerHTML = `<p><b>${i + 1}. ${q.q}</b></p>${optionsHTML}`;
+        container.appendChild(div);
+      });
+
+      form.classList.remove('hidden');
+      document.getElementById('result').innerText = '';
+      startTimer();
+    }
+
+    function gradeTest(event) {
+      event.preventDefault();
+      gradeTestAuto();
+      return false;
+    }
+
+    function gradeTestAuto() {
+      clearInterval(timer);
+      const questions = tests.espanol;
+      let score = 0;
+
+      questions.forEach((q, i) => {
+        const questionDiv = document.getElementById(`question-${i}`);
+        questionDiv.classList.remove('correct', 'incorrect');
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        if (selected) {
+          const userAnswer = parseInt(selected.value);
+          if (userAnswer === q.answer) {
+            score++;
+            questionDiv.classList.add('correct');
+          } else {
+            questionDiv.classList.add('incorrect');
+          }
+        } else {
+          questionDiv.classList.add('incorrect'); // no contestada cuenta como incorrecta
+        }
+      });
+
+      const result = document.getElementById('result');
+      const total = questions.length;
+      let message = '';
+      if (score >= total * 0.9) {
+        message = `¡Excelente! Obtuviste ${score}/${total}.`;
+        result.style.color = '#28a745';
+      } else if (score >= total * 0.6) {
+        message = `Vas bien, pero puedes mejorar. Obtuviste ${score}/${total}.`;
+        result.style.color = '#fd7e14';
+      } else {
+        message = `Debes seguir practicando. Obtuviste ${score}/${total}.`;
+        result.style.color = '#dc3545';
+      }
+
+      result.innerText = message;
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+  </script>
+</body>
+</html>
